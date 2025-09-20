@@ -40,10 +40,5 @@ Cada capa incluye:
 - Nomenclatura técnica (`snake_case`, `kebab-case`)
 - Registro de decisiones y transformaciones
 
-## 📌 Estado del proyecto
-🚧 En desarrollo  
-✅ Estructura inicial completada  
-🔍 Próximo paso: modelado de capa Gold y documentación de reglas de negocio
-
 ## 📬 Autor
 **Geudis Martínez**   
