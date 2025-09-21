@@ -1,5 +1,5 @@
 /*## 📦 Procedimiento: bronze.load_bronze
-
+============================================================================================
 Este procedimiento carga datos en las tablas del esquema `bronze` desde archivos CSV locales.  
 Incluye control de errores, trazabilidad por consola y segmentación por dominio (CRM y ERP).
 
@@ -8,10 +8,10 @@ Incluye control de errores, trazabilidad por consola y segmentación por dominio
 - Carga masiva con `BULK INSERT`
 - Registro de duración por tabla
 - Manejo de errores con `TRY...CATCH`
-
 ### ▶️ Ejecución
 ```sql
 EXEC bronze.load_bronze;
+============================================================================================
 */
 CREATE OR ALTER PROCEDURE bronze.load_bronze AS 
 BEGIN
