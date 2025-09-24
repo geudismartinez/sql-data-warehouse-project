@@ -1,0 +1,137 @@
+-- Muestra los primeros 20 registros con coincidencia parcial en el ID
+SELECT TOP 20
+    cid,
+    bdate,
+    gen
+FROM bronze.erp_cust_az12
+WHERE cid LIKE '%AW00011000%';
+
+-- Muestra los primeros 20 registros sin filtro
+SELECT TOP 20
+    cid,
+    bdate,
+    gen
+FROM bronze.erp_cust_az12;
+
+-- Muestra los primeros 20 registros de la tabla de clientes transformados
+SELECT TOP 20 * FROM silver.crm_cust_info;
+
+-- Aplica transformación condicional al campo cid (remueve prefijo 'NAS')
+SELECT
+    cid,
+    CASE WHEN cid LIKE 'NAS%' THEN SUBSTRING(cid, 4, LEN(cid))
+         ELSE cid
+    END AS cid,
+    bdate,
+    gen
+FROM bronze.erp_cust_az12;
+
+-- Muestra solo el campo transformado
+SELECT
+    CASE WHEN cid LIKE 'NAS%' THEN SUBSTRING(cid, 4, LEN(cid))
+         ELSE cid
+    END AS cid,
+    bdate,
+    gen
+FROM bronze.erp_cust_az12;
+
+-- Validación usando transformación condicional en WHERE
+SELECT
+    cid,
+    CASE WHEN cid LIKE 'NAS%' THEN SUBSTRING(cid, 4, LEN(cid))
+         ELSE cid
+    END AS cid,
+    bdate,
+    gen
+FROM bronze.erp_cust_az12
+WHERE CASE WHEN cid LIKE 'NAS%' THEN SUBSTRING(cid, 4, LEN(cid))
+           ELSE cid
+      END NOT IN (SELECT DISTINCT cst_key FROM silver.crm_cust_info);
+
+-- Validación directa sin transformación en WHERE
+SELECT
+    cid,
+    CASE WHEN cid LIKE 'NAS%' THEN SUBSTRING(cid, 4, LEN(cid))
+         ELSE cid
+    END AS cid,
+    bdate,
+    gen
+FROM bronze.erp_cust_az12
+WHERE cid NOT IN (SELECT DISTINCT cst_key FROM silver.crm_cust_info);
+
+-- Detecta fechas de nacimiento inválidas (antes de 1924 o futuras)
+SELECT 
+    bdate
+FROM bronze.erp_cust_az12
+WHERE bdate < '1924-01-01' OR bdate > GETDATE()
+ORDER BY bdate DESC;
+
+-- Aplica corrección condicional a fechas futuras
+SELECT
+    CASE WHEN cid LIKE 'NAS%' THEN SUBSTRING(cid, 4, LEN(cid))
+         ELSE cid
+    END AS cid,
+    CASE WHEN bdate > GETDATE() THEN NULL
+         ELSE bdate
+    END AS bdate,
+    gen
+FROM bronze.erp_cust_az12;
+
+-- Muestra los valores distintos de género
+SELECT DISTINCT gen
+FROM bronze.erp_cust_az12;
+
+-- Normaliza los valores de género
+SELECT DISTINCT 
+    gen,
+    CASE WHEN UPPER(TRIM(gen)) IN ('F','FEMALE') THEN 'Famele'
+         WHEN UPPER(TRIM(gen)) IN ('M','MALE') THEN 'Male'
+         ELSE 'N/A'
+    END AS gen
+FROM bronze.erp_cust_az12;
+
+-- Aplica transformación completa a cid, bdate y gen
+SELECT
+    CASE WHEN cid LIKE 'NAS%' THEN SUBSTRING(cid, 4, LEN(cid))
+         ELSE cid
+    END AS cid,
+    CASE WHEN bdate > GETDATE() THEN NULL
+         ELSE bdate
+    END AS bdate,
+    CASE WHEN UPPER(TRIM(gen)) IN ('F','FEMALE') THEN 'Famele'
+         WHEN UPPER(TRIM(gen)) IN ('M','MALE') THEN 'Male'
+         ELSE 'N/A'
+    END AS gen
+FROM bronze.erp_cust_az12;
+
+-- Inserta datos transformados en tabla destino
+INSERT INTO silver.erp_cust_az12 (
+    cid,
+    bdate,
+    gen
+)
+SELECT
+    CASE WHEN cid LIKE 'NAS%' THEN SUBSTRING(cid, 4, LEN(cid))
+         ELSE cid
+    END AS cid,
+    CASE WHEN bdate > GETDATE() THEN NULL
+         ELSE bdate
+    END AS bdate,
+    CASE WHEN UPPER(TRIM(gen)) IN ('F','FEMALE') THEN 'Famele'
+         WHEN UPPER(TRIM(gen)) IN ('M','MALE') THEN 'Male'
+         ELSE 'N/A'
+    END AS gen
+FROM bronze.erp_cust_az12;
+
+-- Muestra todos los registros cargados
+SELECT * FROM silver.erp_cust_az12;
+
+-- Detecta fechas de nacimiento inválidas en tabla destino
+SELECT 
+    bdate
+FROM silver.erp_cust_az12
+WHERE bdate < '1924-01-01' OR bdate > GETDATE();
+
+-- Muestra los valores distintos de género en tabla destino
+SELECT DISTINCT gen
+FROM silver.erp_cust_az12;
