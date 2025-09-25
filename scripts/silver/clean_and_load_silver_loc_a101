@@ -1,0 +1,68 @@
+-- Muestra los campos cid y cntry desde la tabla origen
+SELECT 
+    cid,
+    cntry
+FROM bronze.erp_loc_a101;
+
+-- Muestra todos los registros y columnas de la tabla origen
+SELECT * 
+FROM bronze.erp_loc_a101;
+-- Muestra las claves de cliente registradas en la tabla destino
+SELECT cst_key 
+FROM silver.crm_cust_info;
+-- Detecta registros cuyo cid (sin guiones) no está en crm_cust_info
+SELECT 
+    REPLACE(cid, '-', '') AS cid,
+    cntry
+FROM bronze.erp_loc_a101
+WHERE REPLACE(cid, '-', '') NOT IN (
+    SELECT cst_key FROM silver.crm_cust_info
+);
+
+-- Detecta registros cuyo cid original no está en crm_cust_info
+SELECT 
+    REPLACE(cid, '-', '') AS cid,
+    cntry
+FROM bronze.erp_loc_a101
+WHERE cid NOT IN (
+    SELECT cst_key FROM silver.crm_cust_info
+);
+-- Muestra los países distintos registrados en la tabla origen
+SELECT DISTINCT cntry
+FROM bronze.erp_loc_a101
+ORDER BY cntry;
+
+-- Normaliza los valores de país y filtra registros no presentes en crm_cust_info
+SELECT 
+    REPLACE(cid, '-', '') AS cid,
+    CASE 
+        WHEN TRIM(cntry) = 'DE' THEN 'Germany'
+        WHEN TRIM(cntry) IN ('USA', 'US') THEN 'United States'
+        WHEN TRIM(cntry) = '' OR cntry IS NULL THEN 'N/A'
+        ELSE TRIM(cntry)
+    END AS cntry
+FROM bronze.erp_loc_a101
+WHERE cid NOT IN (
+    SELECT cst_key FROM silver.crm_cust_info
+);
+-- Inserta registros transformados en la tabla destino
+INSERT INTO silver.erp_loc_a101 (cid, cntry)
+SELECT 
+    REPLACE(cid, '-', '') AS cid,
+    CASE 
+        WHEN TRIM(cntry) = 'DE' THEN 'Germany'
+        WHEN TRIM(cntry) IN ('USA', 'US') THEN 'United States'
+        WHEN TRIM(cntry) = '' OR cntry IS NULL THEN 'N/A'
+        ELSE TRIM(cntry)
+    END AS cntry
+FROM bronze.erp_loc_a101
+WHERE cid NOT IN (
+    SELECT cst_key FROM silver.crm_cust_info
+);
+-- Muestra los países distintos registrados en la tabla destino
+SELECT DISTINCT cntry
+FROM silver.erp_loc_a101;
+
+-- Muestra todos los registros cargados en la tabla destino
+SELECT * 
+FROM silver.erp_loc_a101;
