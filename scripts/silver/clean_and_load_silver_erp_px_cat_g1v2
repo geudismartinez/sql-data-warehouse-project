@@ -1,0 +1,40 @@
+-- Muestra los campos clave: id, categoría, subcategoría y tipo de mantenimiento
+SELECT 
+    id,
+    cat,
+    subcat,
+    maintenance
+FROM bronze.erp_px_cat_g1v2;
+-- Detecta registros con espacios innecesarios en cat, subcat o maintenance
+SELECT * 
+FROM bronze.erp_px_cat_g1v2
+WHERE cat != TRIM(cat) 
+   OR subcat != TRIM(subcat) 
+   OR maintenance != TRIM(maintenance);
+-- Muestra las categorías distintas registradas
+SELECT DISTINCT cat 
+FROM bronze.erp_px_cat_g1v2;
+
+-- Muestra las subcategorías distintas registradas
+SELECT DISTINCT subcat 
+FROM bronze.erp_px_cat_g1v2;
+
+-- Muestra los tipos de mantenimiento distintos registrados
+SELECT DISTINCT maintenance 
+FROM bronze.erp_px_cat_g1v2;
+-- Inserta todos los registros desde bronze hacia silver sin transformación
+INSERT INTO silver.erp_px_cat_g1v2 (
+    id,
+    cat,
+    subcat,
+    maintenance
+)
+SELECT 
+    id,
+    cat,
+    subcat,
+    maintenance
+FROM bronze.erp_px_cat_g1v2;
+-- Muestra todos los registros cargados en la tabla destino
+SELECT * 
+FROM silver.erp_px_cat_g1v2;
