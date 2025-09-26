@@ -147,7 +147,7 @@ CREATE OR ALTER PROCEDURE silver.load_silver AS
             CASE WHEN bdate > GETDATE() THEN NULL
                  ELSE bdate
             END AS bdate,
-            CASE WHEN UPPER(TRIM(gen)) IN ('F','FAMALE') THEN 'Famele'
+            CASE WHEN UPPER(TRIM(gen)) IN ('F','FEMALE') THEN 'Female'
                  WHEN UPPER(TRIM(gen)) IN ('M','MALE') THEN 'Male'
                  ELSE 'N/A'
             END AS gen
